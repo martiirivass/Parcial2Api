@@ -9,11 +9,15 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Profesor {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String nombre;
-
     private String email;
+
+    // borradro lógico
+    @Column(nullable = false)
+    private boolean activo = true;
 }

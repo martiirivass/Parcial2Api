@@ -29,4 +29,8 @@ public class Curso {
             inverseJoinColumns = @JoinColumn(name = "estudiante_id")
     )
     private List<Estudiante> estudiantes;
+
+    // Borrador lógico
+    @Column(nullable = false)
+    private boolean activo = true;
 }

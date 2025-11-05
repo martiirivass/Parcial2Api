@@ -1,4 +1,5 @@
 package com.facultad.api.service.impl;
+
 import com.facultad.api.dto.*;
 import com.facultad.api.entity.*;
 import com.facultad.api.exception.NotFoundException;
@@ -13,7 +14,8 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@Service @RequiredArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class CursoServiceImpl implements CursoService {
 
     private final CursoRepository cursoRepo;
@@ -22,7 +24,10 @@ public class CursoServiceImpl implements CursoService {
 
     @Override
     public List<CursoDTO> listar() {
-        return cursoRepo.findAll().stream().map(AppMapper::toDTO).collect(toList());
+        // Solo cursos activos
+        return cursoRepo.findByActivoTrue().stream()
+                .map(AppMapper::toDTO)
+                .collect(toList());
     }
 
     @Override
@@ -34,6 +39,7 @@ public class CursoServiceImpl implements CursoService {
         Curso c = Curso.builder()
                 .nombre(req.getNombre())
                 .profesor(prof)
+                .activo(true) // marca activo al crear
                 .build();
 
         c = cursoRepo.save(c);
@@ -49,7 +55,6 @@ public class CursoServiceImpl implements CursoService {
                 .orElseThrow(() -> new NotFoundException("Estudiante no encontrado: " + estudianteId));
 
         c.getEstudiantes().add(e);
-        // no hace falta save explícito si la entidad está en contexto, pero lo dejamos claro
         c = cursoRepo.save(c);
         return AppMapper.toDTO(c);
     }
@@ -58,9 +63,21 @@ public class CursoServiceImpl implements CursoService {
     public List<CursoDTO> cursosDeEstudiante(Long estudianteId) {
         estudianteRepo.findById(estudianteId)
                 .orElseThrow(() -> new NotFoundException("Estudiante no encontrado: " + estudianteId));
-        return cursoRepo.findAll().stream()
-                .filter(c -> c.getEstudiantes().stream().anyMatch(e -> e.getId().equals(estudianteId)))
+
+        return cursoRepo.findByActivoTrue().stream()
+                .filter(c -> c.getEstudiantes().stream()
+                        .anyMatch(e -> e.getId().equals(estudianteId)))
                 .map(AppMapper::toDTO)
                 .collect(toList());
+    }
+
+    // borrado lógico
+    @Override
+    @Transactional
+    public void eliminarLogico(Long id) {
+        Curso c = cursoRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Curso no encontrado: " + id));
+        c.setActivo(false);
+        cursoRepo.save(c);
     }
 }

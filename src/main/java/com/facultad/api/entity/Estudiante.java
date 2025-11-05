@@ -22,4 +22,8 @@ public class Estudiante {
     @JsonBackReference
     @ManyToMany(mappedBy = "estudiantes")
     private List<Curso> cursos;
+
+    //Borradoe lógico
+    @Column(nullable = false)
+    private boolean activo = true;
 }

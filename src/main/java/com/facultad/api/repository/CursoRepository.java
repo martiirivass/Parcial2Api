@@ -1,6 +1,12 @@
 package com.facultad.api.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.facultad.api.entity.Curso;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
 
-public interface CursoRepository extends JpaRepository<Curso, Long> { }
+@Repository
+public interface CursoRepository extends JpaRepository<Curso, Long> {
+    // trae solo los cursos activos
+    List<Curso> findByActivoTrue();
+}
